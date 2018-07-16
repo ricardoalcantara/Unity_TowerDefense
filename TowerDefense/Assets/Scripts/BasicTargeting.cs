@@ -4,27 +4,47 @@ using UnityEngine;
 
 public class BasicTargeting : MonoBehaviour
 {
-    public bool showGizmos = false;
-    public float range = 8f;
-    public float rotationSpeed = 100f;
-    public Transform target;
+    [SerializeField]
+    private bool showGizmos = false;
+    [SerializeField]
+    private float range = 8f;
+    [SerializeField]
+    private float rotationSpeed = 100f;
+    [SerializeField]
+    private Transform target;
+
+    private Quaternion _initialRot;
+
+    public bool ShouldFire { get; private set; }
+
+    void Start()
+    {
+        _initialRot = transform.rotation;
+    }
 
     void Update()
     {
-        float distance = Vector3.Distance(transform.position, target.position);
+        Quaternion desiredRotation = _initialRot;
 
-        Quaternion desiredRotation;
-
-        if (distance <= range)
+        if (target != null)
         {
-            Vector3 direction = transform.position - target.position;
-            desiredRotation = Quaternion.LookRotation(direction);
+            float distance = Vector3.Distance(transform.position, target.position);
+
+            if (distance <= range)
+            {
+                ShouldFire = true;
+                Vector3 direction = target.position - transform.position;
+                desiredRotation = Quaternion.LookRotation(direction);
+            }
+            else
+            {
+                ShouldFire = false;
+            }
         }
         else
         {
-            desiredRotation = Quaternion.LookRotation(Vector3.zero);
+            ShouldFire = false;
         }
-
         transform.rotation = Quaternion.RotateTowards(transform.rotation, desiredRotation, rotationSpeed * Time.deltaTime);
     }
 
